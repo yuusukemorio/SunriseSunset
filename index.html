@@ -8,33 +8,56 @@
 <body>
     <h1>スマートフォンからテキストを送信</h1>
     <input type="text" id="messageInput" placeholder="メッセージを入力">
-    <button onclick="sendMessage()">送信</button>
+    <button id="sendButton">送信</button> <!-- ボタンにIDを追加 -->
+    <div id="debug"></div> <!-- デバッグ情報を表示するためのdiv -->
 
     <script>
         // WebSocketサーバーに接続
         const socket = new WebSocket('wss://your-project-name.glitch.me'); // 確実にwssプロトコルを使用
 
+        // WebSocketサポート確認
+        if ("WebSocket" in window) {
+            displayDebugMessage("WebSocket is supported by your Browser!");
+        } else {
+            displayDebugMessage("WebSocket NOT supported by your Browser!");
+        }
+
         // WebSocket接続時の処理
         socket.onopen = () => {
-            console.log('WebSocket connection established');
+            displayDebugMessage('WebSocket connection established');
         };
 
         // メッセージを送信する関数
         function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value;
+            displayDebugMessage('Sending message: ' + message); // 送信前にメッセージを画面に表示
+
             socket.send(JSON.stringify({ message: message }));  // テキストメッセージをJSON形式で送信
             messageInput.value = '';  // 入力フィールドをクリア
+
+            displayDebugMessage('Message sent and input cleared'); // 送信後にメッセージを画面に表示
         }
+
+        // 送信ボタンがクリックされた時にsendMessage関数を呼び出す
+        document.getElementById('sendButton').addEventListener('click', sendMessage);
 
         // エラーハンドリング
         socket.onerror = (error) => {
-            console.error('WebSocket Error:', error);
+            displayDebugMessage('WebSocket Error: ' + error);
         };
 
         socket.onclose = () => {
-            console.log('WebSocket connection closed');
+            displayDebugMessage('WebSocket connection closed');
         };
+
+        // デバッグ情報を画面に表示する関数
+        function displayDebugMessage(message) {
+            const debugDiv = document.getElementById('debug');
+            const messageElement = document.createElement('p');
+            messageElement.textContent = message;
+            debugDiv.appendChild(messageElement);
+        }
     </script>
 </body>
 </html>
