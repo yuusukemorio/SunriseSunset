@@ -14,18 +14,16 @@
     <p id="sunrise">日の出: </p>
     <p id="sunset">日の入り: </p>
     <div id="messages"></div>  <!-- 受信メッセージを表示するためのdiv -->
+    <div id="debug"></div> <!-- デバッグ情報を表示するためのdiv -->
 
     <script src="./index_js.js"></script>
     <script>
-        // WebSocketサーバーに接続
-        const socket = new WebSocket('https://breezy-absorbed-dimple.glitch.me');
+        const socket = new WebSocket('wss://your-project-name.glitch.me');
 
-        // WebSocket接続時の処理
         socket.onopen = () => {
-            console.log('WebSocket connection established');
+            displayDebugMessage('WebSocket connection established');
         };
 
-        // WebSocketでメッセージを受信した時の処理
         socket.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
@@ -33,14 +31,31 @@
                     const messagesDiv = document.getElementById('messages');
                     const messageElement = document.createElement('p');
                     messageElement.textContent = data.message;
-                    messagesDiv.appendChild(messageElement);  // 受信したメッセージを表示
+                    messagesDiv.appendChild(messageElement);
+
+                    displayDebugMessage('Message received: ' + data.message);
                 } else {
-                    console.log('Received data:', data);
+                    displayDebugMessage('Received data: ' + JSON.stringify(data));
                 }
             } catch (e) {
-                console.error('Invalid JSON:', event.data);
+                displayDebugMessage('Invalid JSON: ' + event.data);
             }
         };
+
+        socket.onerror = (error) => {
+            displayDebugMessage('WebSocket Error: ' + error);
+        };
+
+        socket.onclose = () => {
+            displayDebugMessage('WebSocket connection closed');
+        };
+
+        function displayDebugMessage(message) {
+            const debugDiv = document.getElementById('debug');
+            const messageElement = document.createElement('p');
+            messageElement.textContent = message;
+            debugDiv.appendChild(messageElement);
+        }
     </script>
 </body>
 </html>
