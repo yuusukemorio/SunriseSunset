@@ -3,17 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sunrise and Sunset Times</title>
-    <link rel="stylesheet" href="index_css.css" type="text/css">
+    <title>スマートフォン側</title>
 </head>
 <body>
-    <p class="test">　
-        <img src="太陽.png" alt="">　
-    </p>
-    <p class="test2">あああ</p>
-    <p id="sunrise">日の出: </p>
-    <p id="sunset">日の入り: </p>
+    <h1>スマートフォンの位置情報を送信</h1>
+    <script>
+        // WebSocketサーバーに接続
+        const socket = new WebSocket('https://breezy-absorbed-dimple.glitch.me');
 
-    <script src="index_js.js"></script>
+        // WebSocket接続時の処理
+        socket.onopen = () => {
+            console.log('WebSocket connection established');
+        };
+
+        // 位置情報を送信する関数
+        function sendPosition(position) {
+            const data = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+            };
+            socket.send(JSON.stringify(data));  // 位置情報をJSON形式で送信
+        }
+
+        // 位置情報取得エラー時の処理
+        function handleError(error) {
+            console.error('Error getting position:', error);
+        }
+
+        // Geolocation APIを使用して位置情報を監視
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(sendPosition, handleError, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 5000,
+            });
+        } else {
+            console.error('Geolocation is not supported by this browser.');
+        }
+    </script>
 </body>
 </html>
