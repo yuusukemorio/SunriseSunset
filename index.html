@@ -10,9 +10,8 @@
     <input type="text" id="messageInput" placeholder="メッセージを入力">
     <button id="sendButton">送信</button>
     <div id="debug"></div> <!-- デバッグ情報を表示するためのdiv -->
-
-
     <a href="sun_desktop.html">デスクトップ</a>
+
     <script>
         function displayDebugMessage(message) {
             const debugDiv = document.getElementById('debug');
@@ -29,10 +28,19 @@
             displayDebugMessage("WebSocket NOT supported by your Browser!");
         }
 
+        // WebSocketサーバーに接続
         const socket = new WebSocket('https://breezy-absorbed-dimple.glitch.me');
 
         socket.onopen = () => {
             displayDebugMessage('WebSocket connection established');
+        };
+
+        socket.onerror = (error) => {
+            displayDebugMessage('WebSocket Error: ' + error.message);
+        };
+
+        socket.onclose = () => {
+            displayDebugMessage('WebSocket connection closed');
         };
 
         function sendMessage() {
@@ -40,20 +48,16 @@
             const message = messageInput.value;
             displayDebugMessage('Sending message: ' + message);
 
-            socket.send(JSON.stringify({ message: message }));
-            messageInput.value = '';
-            displayDebugMessage('Message sent and input cleared');
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ message: message }));
+                messageInput.value = '';
+                displayDebugMessage('Message sent and input cleared');
+            } else {
+                displayDebugMessage('WebSocket is not open: readyState=' + socket.readyState);
+            }
         }
 
         document.getElementById('sendButton').addEventListener('click', sendMessage);
-
-        socket.onerror = (error) => {
-            displayDebugMessage('WebSocket Error: ' + error);
-        };
-
-        socket.onclose = () => {
-            displayDebugMessage('WebSocket connection closed');
-        };
     </script>
 </body>
 </html>
